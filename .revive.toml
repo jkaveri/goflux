@@ -1,0 +1,101 @@
+confidence = 0.8
+errorCode = 1
+ignoreGeneratedHeader = true
+severity = "warning"
+warningCode = 1
+
+[rule.argument-limit]
+arguments = [4]
+
+[rule.bare-return]
+
+[rule.blank-imports]
+
+[rule.cognitive-complexity]
+arguments = [10]
+
+[rule.cyclomatic]
+arguments = [10]
+
+[rule.context-as-argument]
+
+[rule.context-keys-type]
+
+[rule.confusing-naming]
+
+[rule.constant-logical-expr]
+
+[rule.dot-imports]
+
+[rule.early-return]
+
+[rule.empty-block]
+
+[rule.empty-lines]
+
+[rule.enforce-map-style]
+arguments = ["literal"]
+
+[rule.enforce-slice-style]
+arguments = ["literal"]
+
+[rule.error-naming]
+
+[rule.error-return]
+
+[rule.error-strings]
+
+[rule.errorf]
+
+[rule.exported]
+
+[rule.filename-format]
+arguments = ["^[_a-z][_a-z0-9]*\\.go$"]
+
+[rule.import-alias-naming]
+arguments = ["^[a-z][a-z0-9]{0,}$"]
+
+[rule.increment-decrement]
+
+[rule.indent-error-flow]
+
+[rule.line-length-limit]
+arguments = [200]
+
+[rule.modifies-value-receiver]
+
+[rule.nested-structs]
+
+[rule.package-comments]
+
+[rule.range]
+
+[rule.range-val-in-closure]
+
+[rule.receiver-naming]
+
+[rule.redefines-builtin-id]
+
+[rule.superfluous-else]
+
+[rule.time-naming]
+
+[rule.unexported-naming]
+
+[rule.unexported-return]
+
+[rule.unhandled-error]
+
+[rule.unreachable-code]
+
+[rule.unused-parameter]
+
+[rule.unused-receiver]
+
+[rule.useless-break]
+
+[rule.use-any]
+
+[rule.var-declaration]
+
+[rule.var-naming]

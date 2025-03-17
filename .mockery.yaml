@@ -1,0 +1,13 @@
+resolve-type-alias: false
+issue-845-fix: true
+disable-version-string: true
+packages:
+  github.com/jkaveri/goflux:
+    config:
+      all: true
+      recursive: true
+      packageprefix: "mock"
+      dir: "{{.InterfaceDir}}/mock{{.PackageName}}"
+      filename: "Mock{{.InterfaceName}}.go"
+      mockname: "{{.InterfaceName}}"
+      outpkg: "mock{{.PackageName}}"

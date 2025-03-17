@@ -1,0 +1,150 @@
+run:
+  # Timeout for analysis, e.g. 30s, 5m
+  timeout: 5m
+
+  # Include test files or not
+  tests: false
+
+  # Allow multiple parallel golangci-lint instances running
+  allow-parallel-runners: false
+
+# Output configuration options
+output:
+
+  # Print lines of code with issue
+  print-issued-lines: true
+
+  # Print linter name in the end of issue text
+  print-linter-name: true
+linters-settings:
+  gofumpt:
+    module-path: github.com/jkaveri/goflux
+  revive:
+    # Maximum number of open files at the same time.
+    # See https://github.com/mgechev/revive#command-line-flags
+    # Defaults to unlimited.
+    max-open-files: 2048
+    # When set to true, ignores files with "GENERATED" header, similar to golint.
+    # See https://github.com/mgechev/revive#available-rules for details.
+    # Default: false
+    ignore-generated-header: true
+    # Sets the default severity.
+    # See https://github.com/mgechev/revive#configuration
+    # Default: error
+    severity: warning
+    # Enable all available rules.
+    # Default: false
+    enable-all-rules: false
+    # Sets the default failure confidence.
+    # This means that linting errors with less than 0.8 confidence will be ignored.
+    # Default: 0.8
+    confidence: 0.8
+    rules:
+      - name: argument-limit
+        arguments: [4]
+      - name: bare-return
+        disabled: false
+      - name: blank-imports
+        disabled: false
+      - name: cyclomatic
+        arguments: [10]
+      - name: context-as-argument
+        disabled: false
+      - name: context-keys-type
+        disabled: false
+      - name: confusing-naming
+        disabled: false
+      - name: constant-logical-expr
+        disabled: false
+      - name: dot-imports
+        disabled: false
+      - name: early-return
+        disabled: false
+      - name: empty-block
+        disabled: false
+      - name: empty-lines
+        disabled: false
+      - name: enforce-map-style
+        arguments: ["literal"]
+      - name: enforce-slice-style
+        arguments: ["literal"]
+      - name: error-naming
+        disabled: false
+      - name: error-return
+        disabled: false
+      - name: error-strings
+        disabled: false
+      - name: errorf
+        disabled: false
+      - name: exported
+        disabled: false
+      - name: filename-format
+        arguments: ["^[_a-z][_a-z0-9]*\\.go$"]
+      - name: import-alias-naming
+        arguments: ["^[a-z][a-z0-9]{0,}$"]
+      - name: increment-decrement
+        disabled: false
+      - name: indent-error-flow
+        disabled: false
+      - name: line-length-limit
+        arguments: [200]
+      - name: modifies-value-receiver
+        disabled: false
+      - name: nested-structs
+        disabled: false
+      - name: package-comments
+        disabled: false
+      - name: range
+        disabled: false
+      - name: range-val-in-closure
+        disabled: false
+      - name: receiver-naming
+        disabled: false
+      - name: redefines-builtin-id
+        disabled: false
+      - name: superfluous-else
+        disabled: false
+      - name: time-naming
+        disabled: false
+      - name: unexported-naming
+        disabled: false
+      - name: unexported-return
+        disabled: false
+      - name: unhandled-error
+        disabled: false
+      - name: unreachable-code
+        disabled: false
+      - name: unused-parameter
+        disabled: false
+      - name: unused-receiver
+        disabled: false
+      - name: useless-break
+        disabled: false
+      - name: use-any
+        disabled: false
+      - name: var-declaration
+        disabled: false
+      - name: var-naming
+        disabled: false
+linters:
+  disable-all: true
+  enable:
+    - revive
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - gofumpt
+    - wsl
+    - gosec
+    - unused
+
+# Exclude specific files and directories
+issues:
+
+  # Maximum issues count per one linter
+  max-issues-per-linter: 0
+
+  # Maximum count of issues with the same text
+  max-same-issues: 0
