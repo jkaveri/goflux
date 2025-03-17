@@ -35,7 +35,7 @@ import (
 // Returns:
 //   - A channel of type T that receives all values from input channels
 func JoinReads[T any](channels ...chan T) <-chan T {
-	out := make(chan T)
+	out := make(chan T, len(channels))
 
 	go func() {
 		var wg sync.WaitGroup
@@ -43,7 +43,7 @@ func JoinReads[T any](channels ...chan T) <-chan T {
 		wg.Add(len(channels))
 
 		for _, c := range channels {
-			go func(c <-chan T) {
+			go func(c chan T) {
 				defer wg.Done()
 
 				for v := range c {
@@ -87,18 +87,17 @@ func JoinReads[T any](channels ...chan T) <-chan T {
 // Returns:
 //   - A write-only channel of type T that forwards values to all output channels
 func JoinWrites[T any](channels ...chan T) chan<- T {
-	input := make(chan T)
+	input := make(chan T, len(channels))
 	closeChan := make(chan struct{})
 
 	go func() {
 		for v := range input {
 			// Fan-out to all output channels
 			for _, ch := range channels {
-				go func(c chan<- T) {
+				go func(c chan T) {
 					select {
 					case c <- v:
 					case <-closeChan:
-						return
 					}
 				}(ch)
 			}
@@ -124,10 +123,7 @@ func JoinWrites[T any](channels ...chan T) chan<- T {
 // Returns:
 //   - A read-write channel of type T that can be used to both read and write values
 func Joins[T any](channels ...chan T) (read <-chan T, write chan<- T) {
-	read = JoinReads(channels...)
-	write = JoinWrites(channels...)
-
-	return read, write
+	return JoinReads(channels...), JoinWrites(channels...)
 }
 
 // Split creates n new channels and forwards values from the input channel to all of them.
@@ -155,7 +151,7 @@ func Joins[T any](channels ...chan T) (read <-chan T, write chan<- T) {
 //
 // Returns:
 //   - A slice of n read-only channels that each receive all values
-func Split[T any](input <-chan T, n int) []<-chan T {
+func Split[T any](input chan T, n int) []<-chan T {
 	outputs := make([]chan T, n)
 	for i := 0; i < n; i++ {
 		outputs[i] = make(chan T)
@@ -237,7 +233,7 @@ func Split[T any](input <-chan T, n int) []<-chan T {
 //
 // Returns:
 //   - Two read-only channels that each receive all values
-func Tee[T any](input <-chan T) (<-chan T, <-chan T) {
+func Tee[T any](input chan T) (<-chan T, <-chan T) {
 	out1 := make(chan T)
 	out2 := make(chan T)
 
@@ -293,7 +289,7 @@ func Tee[T any](input <-chan T) (<-chan T, <-chan T) {
 //
 // Returns:
 //   - A channel that only receives values that satisfy the predicate
-func Filter[T any](input <-chan T, predicate func(T) bool) <-chan T {
+func Filter[T any](input chan T, predicate func(T) bool) <-chan T {
 	out := make(chan T)
 
 	go func() {
@@ -344,7 +340,7 @@ func Filter[T any](input <-chan T, predicate func(T) bool) <-chan T {
 //
 // Returns:
 //   - A channel that receives transformed values
-func Map[T any, R any](input <-chan T, transform func(T) R) <-chan R {
+func Map[T any, R any](input chan T, transform func(T) R) <-chan R {
 	out := make(chan R)
 
 	go func() {
@@ -382,7 +378,7 @@ func Map[T any, R any](input <-chan T, transform func(T) R) <-chan R {
 //
 // Returns:
 //   - A channel that implements timeout behavior
-func WithTimeout[T any](input <-chan T, timeout time.Duration, defaultValue T) <-chan T {
+func WithTimeout[T any](input chan T, timeout time.Duration, defaultValue T) <-chan T {
 	if timeout <= 0 {
 		panic("timeout must be greater than 0")
 	}
@@ -448,7 +444,7 @@ func WithTimeout[T any](input <-chan T, timeout time.Duration, defaultValue T) <
 //
 // Returns:
 //   - A channel that receives slices of values
-func Batch[T any](input <-chan T, batchSize int) <-chan []T {
+func Batch[T any](input chan T, batchSize int) <-chan []T {
 	if batchSize <= 0 {
 		batchSize = 1
 	}
@@ -516,7 +512,7 @@ func Batch[T any](input <-chan T, batchSize int) <-chan []T {
 //
 // Returns:
 //   - A rate-limited channel
-func RateLimit[T any](input <-chan T, interval time.Duration) <-chan T {
+func RateLimit[T any](input chan T, interval time.Duration) <-chan T {
 	out := make(chan T)
 
 	go func() {
@@ -579,7 +575,7 @@ func RateLimit[T any](input <-chan T, interval time.Duration) <-chan T {
 //
 // Returns:
 //   - A channel that receives the final reduced value
-func Reduce[T any, R any](input <-chan T, initial R, reducer func(R, T) R) <-chan R {
+func Reduce[T any, R any](input chan T, initial R, reducer func(R, T) R) <-chan R {
 	out := make(chan R, 1) // Buffer of 1 to hold the final result
 
 	go func() {

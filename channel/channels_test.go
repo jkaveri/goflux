@@ -132,6 +132,7 @@ func TestJoinWrites(t *testing.T) {
 			writer := channel.JoinWrites(channels...)
 
 			var wg sync.WaitGroup
+			var mu sync.Mutex // Add mutex for synchronizing access to received slice
 			wg.Add(tt.numChans)
 
 			received := make([]int, 0, tt.numChans)
@@ -141,7 +142,9 @@ func TestJoinWrites(t *testing.T) {
 				go func(c chan int) {
 					defer wg.Done()
 					v := <-c
+					mu.Lock() // Lock before modifying shared slice
 					received = append(received, v)
+					mu.Unlock() // Unlock after modifying
 				}(ch)
 			}
 
@@ -204,23 +207,36 @@ func TestSplit(t *testing.T) {
 				close(input)
 			}()
 
-			// Verify each output channel receives all values
+			// Collect results from each output channel
 			var wg sync.WaitGroup
+			var mu sync.Mutex
 			wg.Add(tt.numOutputs)
+			results := make([][]int, tt.numOutputs)
 
-			for _, ch := range outputs {
-				go func(c <-chan int) {
+			for i, ch := range outputs {
+				i := i // Capture loop variable
+				ch := ch
+				go func() {
 					defer wg.Done()
 					var received []int
-					for v := range c {
+					for v := range ch {
 						received = append(received, v)
 					}
-					assert.Equal(t, len(tt.input), len(received), "received values length mismatch")
-					assert.Equal(t, tt.input, received, "received values mismatch")
-				}(ch)
+					mu.Lock()
+					results[i] = received
+					mu.Unlock()
+				}()
 			}
 
 			wg.Wait()
+
+			// Verify each output channel received all values
+			for i, received := range results {
+				assert.Equal(t, len(tt.input), len(received),
+					fmt.Sprintf("output channel %d: received values length mismatch", i))
+				assert.Equal(t, tt.input, received,
+					fmt.Sprintf("output channel %d: received values mismatch", i))
+			}
 		})
 	}
 }
@@ -271,6 +287,7 @@ func TestTee(t *testing.T) {
 
 			// Test both output channels receive all values
 			var wg sync.WaitGroup
+			var mu sync.Mutex
 			wg.Add(2)
 
 			results := make([][]int, 2)
@@ -282,7 +299,9 @@ func TestTee(t *testing.T) {
 				for v := range out1 {
 					received = append(received, v)
 				}
+				mu.Lock()
 				results[0] = received
+				mu.Unlock()
 			}()
 
 			// Read from second output channel
@@ -292,7 +311,9 @@ func TestTee(t *testing.T) {
 				for v := range out2 {
 					received = append(received, v)
 				}
+				mu.Lock()
 				results[1] = received
+				mu.Unlock()
 			}()
 
 			wg.Wait()
